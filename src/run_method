@@ -1,0 +1,30 @@
+#!/usr/local/bin/Rscript
+default_file_name <- '/data/output_dpt.json'
+input <- commandArgs(trailingOnly=TRUE)[1]
+output <- commandArgs(trailingOnly=TRUE)[2]
+
+# Arg checking, and adding /data/ to output.
+if(is.na(output)){
+  output <- default_file_name
+} else {
+  output <- paste(c("/data/", output),collapse="")
+}
+
+library(destiny) 
+library(Biobase)
+read_data <- function(file){
+  # Read tab matrix from data dir.
+  data <- as.matrix(read.table(paste(c("/data/",file),collapse=""), sep="\t", header=T))
+  library(Biobase)
+  ExpressionSet(assayData = data)
+}
+dpt_analysis <- function(exp_matrix){
+  dm <- DiffusionMap(exp_matrix)
+  DPT(dm)
+}
+
+data <- read_data(input)
+dpt <- dpt_analysis(data)
+
+source("/home/traj-converters/src/R/dpt_convert.r")
+write_common_json(dpt, file=output)
