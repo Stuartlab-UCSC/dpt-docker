@@ -1,3 +1,4 @@
+#!/usr/local/bin/Rscript
 default_file_name <- '/data/dpt_output.json'
 default_format <- 'json'
 
@@ -15,7 +16,6 @@ if(is.na(format)){
   format <- default_format
 }
 
- 
 suppressMessages(library(destiny)) 
 suppressMessages(library(Biobase))
 
