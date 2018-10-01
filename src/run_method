@@ -1,30 +1,48 @@
-#!/usr/local/bin/Rscript
-default_file_name <- '/data/output_dpt.json'
+default_file_name <- '/data/dpt_output.json'
+default_format <- 'json'
+
 input <- commandArgs(trailingOnly=TRUE)[1]
 output <- commandArgs(trailingOnly=TRUE)[2]
+format <- commandArgs(trailingOnly=TRUE)[3]
 
-# Arg checking, and adding /data/ to output.
+# Arg checking, & setting defaults
 if(is.na(output)){
   output <- default_file_name
 } else {
   output <- paste(c("/data/", output),collapse="")
 }
+if(is.na(format)){
+  format <- default_format
+}
 
-library(destiny) 
-library(Biobase)
+ 
+suppressMessages(library(destiny)) 
+suppressMessages(library(Biobase))
+
 read_data <- function(file){
   # Read tab matrix from data dir.
   data <- as.matrix(read.table(paste(c("/data/",file),collapse=""), sep="\t", header=T, row.names=1))
   library(Biobase)
   ExpressionSet(assayData = data)
 }
+
 dpt_analysis <- function(exp_matrix){
   dm <- DiffusionMap(exp_matrix)
   DPT(dm)
 }
 
+message("reading input")
 data <- read_data(input)
+message("running dpt")
 dpt <- dpt_analysis(data)
 
 source("/home/traj-converters/src/R/dpt_convert.r")
-write_common_json(dpt, file=output)
+
+if(format == 'json'){
+  message("Converting to common format")
+  write_common_json(dpt, file=output)
+} else if (format == 'cxb'){
+  message("Converterting to cell x branch")
+  write_cell_x_branch(dpt, file=output)
+}
+message("completed")
